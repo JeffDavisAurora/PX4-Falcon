@@ -64,9 +64,9 @@ void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const 
 	//_yaw_controller = new RSLQR("yaw");
 
 	std::cout << "TEST TEST TEST" << std::endl;
-	_roll_controller = RSLQR(0.15500f, 0.075f, 1.0f, -1.0f, _lim_int(0));
-	_pitch_controller = RSLQR(0.15500f, 0.075f, 1.0f, -1.0f, _lim_int(1));
-	_yaw_controller = RSLQR(0.10f, 0.02f, 1.0f, -1.0f, _lim_int(2));
+	_roll_controller = RSLQR(0.15500f, 0.75f, 1.0f, -1.0f, _lim_int(0));
+	_pitch_controller = RSLQR(0.15500f, 0.75f, 1.0f, -1.0f, _lim_int(1));
+	_yaw_controller = RSLQR(0.10f, 0.75f, 1.0f, -1.0f, _lim_int(2));
 
 
 }
@@ -84,6 +84,7 @@ void RateControlFalcon::setPositiveSaturationFlag(size_t axis, bool is_saturated
 		_control_allocator_saturation_positive(axis) = is_saturated;
 	}
 }
+
 
 void RateControlFalcon::setNegativeSaturationFlag(size_t axis, bool is_saturated)
 {
