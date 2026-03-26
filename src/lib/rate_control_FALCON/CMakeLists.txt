@@ -31,20 +31,18 @@
 #
 ############################################################################
 
-px4_add_module(
-	MODULE modules__mc_rate_control
-	MAIN mc_rate_control
-	COMPILE_FLAGS
-		${MAX_CUSTOM_OPT_LEVEL}
-	SRCS
-		MulticopterRateControl.cpp
-		MulticopterRateControl.hpp
-	MODULE_CONFIG
-		mc_acro_params.yaml
-		mc_rate_control_params.yaml
-	DEPENDS
-		circuit_breaker
-		mathlib
-		RateControlFalcon
-		px4_work_queue
-	)
+px4_add_library(RateControlFalcon
+	RSLQR.cpp
+	RSLQR.hpp
+	rate_control_falcon.cpp
+	rate_control_falcon.hpp
+	gain_compression.cpp
+	gain_compression.hpp
+	
+
+)
+target_compile_options(RateControlFalcon PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
+target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(RateControlFalcon PRIVATE mathlib)
+
+px4_add_unit_gtest(SRC rate_control_test.cpp LINKLIBS RateControlFalcon)

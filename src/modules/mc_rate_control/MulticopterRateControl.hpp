@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <lib/rate_control/rate_control.hpp>
+#include <lib/rate_control_FALCON/rate_control_falcon.hpp>
 #include <lib/mathlib/math/filter/AlphaFilter.hpp>
 #include <lib/matrix/matrix/math.hpp>
 #include <lib/perf/perf_counter.h>
@@ -92,7 +92,7 @@ private:
 
 	void updateActuatorControlsStatus(const vehicle_torque_setpoint_s &vehicle_torque_setpoint, float dt);
 
-	RateControl _rate_control; ///< class for rate control calculations
+	RateControlFalcon _rate_control; ///< class for rate control calculations
 
 	uORB::Subscription _battery_status_sub{ORB_ID(battery_status)};
 	uORB::Subscription _control_allocator_status_sub{ORB_ID(control_allocator_status)};
