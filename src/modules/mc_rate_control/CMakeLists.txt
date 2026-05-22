@@ -45,6 +45,7 @@ px4_add_module(
 	DEPENDS
 		circuit_breaker
 		mathlib
-		RateControl
+		RateControlFalcon
+		#RateControl
 		px4_work_queue
 	)

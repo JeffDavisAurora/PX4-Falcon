@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2019 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,17 +30,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-# px4_add_module(
-# 	MODULE modules__vtol_att_control
-# 	MAIN vtol_att_control
-# 	SRCS
-# 		vtol_att_control_main.cpp
-# 		tiltrotor.cpp
-# 		vtol_type.cpp
-# 		tailsitter.cpp
-# 		standard.cpp
-# 	MODULE_CONFIG
-# 		standard_params.yaml
-# 		tiltrotor_params.yaml
-# 		vtol_att_control_params.yaml
-# 	)
+
+px4_add_library(RateControlFalcon
+	FALCON/Controllers/RSLQR.cpp
+	FALCON/Controllers/RSLQR.hpp
+	rate_control_falcon.cpp
+	rate_control_falcon.hpp
+	gain_compression.cpp
+	gain_compression.hpp
+
+
+)
+target_compile_options(RateControlFalcon PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
+target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(RateControlFalcon PRIVATE mathlib)
+
+px4_add_unit_gtest(SRC rate_control_test.cpp LINKLIBS RateControlFalcon)
