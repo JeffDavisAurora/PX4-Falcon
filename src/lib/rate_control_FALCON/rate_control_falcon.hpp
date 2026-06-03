@@ -43,6 +43,9 @@
 
 #include <mathlib/mathlib.h>
 #include <uORB/topics/rate_ctrl_status.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/falcon_controller.h>
+#include <px4_platform_common/time.h>
 
 #include "FALCON/Controllers/RSLQR.hpp"
 
@@ -124,6 +127,8 @@ public:
 
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
+	void publishStatus(const matrix::Vector3f &rate_error, const matrix::Vector3f &rate_sp,
+                           const matrix::Vector3f &rate, const matrix::Vector3f &torque);
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z
@@ -138,10 +143,12 @@ private:
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
 	matrix::Vector<bool, 3> _control_allocator_saturation_positive;
+	
 	// Controllers
-
 	RSLQR _roll_controller = RSLQR(1.0f, -1.0f);
 	RSLQR _pitch_controller = RSLQR(1.0f, -1.0f);
 	RSLQR _yaw_controller = RSLQR(1.0f, -1.0f);
 
+	// Msg
+	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};
 };

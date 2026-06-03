@@ -96,9 +96,8 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	float pitch_torque 	= _pitch_controller.update(rate_error(1), _rate_int(1), angular_accel(1));
 	float yaw_torque 	= _yaw_controller.update(rate_error(2), _rate_int(2), angular_accel(2));
 	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
-
-
-
+	
+	publishStatus(rate_error, rate_sp, rate, torque);
 	// // angular rates error
 
 	// // PID control with feed forward
@@ -108,11 +107,61 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
-	// std::cout << (test_torque - torque)(0)/torque(0);
-	// std::cout << (test_torque - torque)(1)/torque(1);
-	// std::cout << (test_torque - torque)(2)/torque(2) << std::endl;
 
 	return torque;
+}
+
+void RateControlFalcon::publishStatus(const Vector3f &rate_error, 
+				const Vector3f &rate_sp,
+                		const Vector3f &rate, 
+				const Vector3f &torque)
+{
+	//falcon_rate_control_messages
+        falcon_controller_s status{};
+        status.timestamp = hrt_absolute_time();
+
+        //Controller type
+        status.controller = 0;
+
+        // PID Gains
+        status.proportional_gain[0] = _gain_p(0);
+        status.proportional_gain[1] = _gain_p(1);
+        status.proportional_gain[2] = _gain_p(2);
+
+        status.integral_gain[0] = _gain_i(0);
+        status.integral_gain[1] = _gain_i(1);
+        status.integral_gain[2] = _gain_i(2);
+
+        status.derivative_gain[0] = _gain_d(0);
+        status.derivative_gain[1] = _gain_d(1);
+        status.derivative_gain[2] = _gain_d(2);
+
+        // Rate Errors
+        status.roll_rate_error = rate_error(0);
+        status.pitch_rate_error = rate_error(1);
+        status.yaw_rate_error = rate_error(2);
+
+        // Integrals
+        status.roll_rate_integral = _rate_int(0);
+        status.pitch_rate_integral = _rate_int(1);
+        status.yaw_rate_integral = _rate_int(2);
+
+        // Outputs
+        status.roll_torque = torque(0);
+        status.pitch_torque = torque(1);
+        status.yaw_torque = torque(2);
+
+        // Setpoints
+        status.roll_rate_sp = rate_sp(0);
+        status.pitch_rate_sp = rate_sp(1);
+        status.yaw_rate_sp = rate_sp(2);
+
+        // Actual Rates
+        status.roll_rate = rate(0);
+        status.pitch_rate = rate(1);
+        status.yaw_rate = rate(2);
+
+        _falcon_status_pub.publish(status);
 }
 
 void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)

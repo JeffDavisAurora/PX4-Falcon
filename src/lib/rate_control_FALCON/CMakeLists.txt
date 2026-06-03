@@ -36,13 +36,10 @@ px4_add_library(RateControlFalcon
 	FALCON/Controllers/RSLQR.hpp
 	rate_control_falcon.cpp
 	rate_control_falcon.hpp
-	gain_compression.cpp
-	gain_compression.hpp
-
 
 )
 target_compile_options(RateControlFalcon PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
 target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(RateControlFalcon PRIVATE mathlib)
+target_link_libraries(RateControlFalcon PRIVATE mathlib uorb_msgs)
 
 px4_add_unit_gtest(SRC rate_control_test.cpp LINKLIBS RateControlFalcon)
