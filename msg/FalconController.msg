@@ -1,4 +1,4 @@
-uint8 controller              
+int32 controller_type
 
 # Roll/pitch/yaw
 float32[3] proportional_gain

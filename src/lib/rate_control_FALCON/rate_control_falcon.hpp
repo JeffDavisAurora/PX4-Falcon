@@ -47,13 +47,23 @@
 #include <uORB/topics/falcon_controller.h>
 #include <px4_platform_common/time.h>
 
+//Add New Controllers here
+#include "FALCON/Controllers/RateControllerBase.hpp"
 #include "FALCON/Controllers/RSLQR.hpp"
+#include "FALCON/Controllers/PID.hpp"
 
 class RateControlFalcon
 {
 public:
 	RateControlFalcon() = default;
-	~RateControlFalcon() = default;
+	~RateControlFalcon();
+
+	/**
+	 * Switch the type of Controller
+	 * @param type int32_t type of contoller
+	 */
+
+	void switchController(int32_t type);
 
 	/**
 	 * Set the rate control PID gains
@@ -68,13 +78,12 @@ public:
 	 * @param integrator_limit limit value for all axes x, y, z
 	 */
 	void setIntegratorLimit(const matrix::Vector3f &integrator_limit) { _lim_int = integrator_limit; };
-
 	/**
 	 * Set direct rate to torque feed forward gain
 	 * @see _gain_ff
 	 * @param FF 3D vector of feed forward gains for body x,y,z axis
 	 */
-	void setFeedForwardGain(const matrix::Vector3f &FF) { _gain_ff = FF; };
+	void setFeedForwardGain(const matrix::Vector3f &FF);
 
 	/**
 	 * Set saturation status
@@ -145,9 +154,11 @@ private:
 	matrix::Vector<bool, 3> _control_allocator_saturation_positive;
 	
 	// Controllers
-	RSLQR _roll_controller = RSLQR(1.0f, -1.0f);
-	RSLQR _pitch_controller = RSLQR(1.0f, -1.0f);
-	RSLQR _yaw_controller = RSLQR(1.0f, -1.0f);
+	RateControllerBase *_roll_controller{nullptr};
+	RateControllerBase *_pitch_controller{nullptr};
+	RateControllerBase *_yaw_controller{nullptr};
+
+	int32_t _active_ctrl_type{-1};
 
 	// Msg
 	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};
