@@ -51,6 +51,7 @@
 #include "FALCON/Controllers/RateControllerBase.hpp"
 #include "FALCON/Controllers/RSLQR.hpp"
 #include "FALCON/Controllers/PID.hpp"
+#include "FALCON/Controllers/OBLTR.hpp"
 
 class RateControlFalcon
 {

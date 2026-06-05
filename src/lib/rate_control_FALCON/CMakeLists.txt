@@ -37,6 +37,8 @@ px4_add_library(RateControlFalcon
 	FALCON/Controllers/RSLQR.hpp
 	FALCON/Controllers/PID.cpp
 	FALCON/Controllers/PID.hpp
+	FALCON/Controllers/OBLTR.cpp
+	FALCON/Controllers/OBLTR.hpp
 	rate_control_falcon.cpp
 	rate_control_falcon.hpp
 

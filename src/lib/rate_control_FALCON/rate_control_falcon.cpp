@@ -187,10 +187,15 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		// and up to 200 deg error leads to <25% reduction of I.
 		float i_factor = rate_error(i) / math::radians(400.f);
 		i_factor = math::max(0.0f, 1.f - i_factor * i_factor);
-
+		
+		float rate_i;
 		// Perform the integration using a first order method
-		float rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
-
+		if(_active_ctrl_type != 2) {
+			rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
+		}
+		else {
+			rate_i = _rate_int(i) + rate_error(i) * dt;
+		}
 		// do not propagate the result if out of range or invalid
 		if (PX4_ISFINITE(rate_i)) {
 			_rate_int(i) = math::constrain(rate_i, -_lim_int(i), _lim_int(i));
@@ -228,6 +233,12 @@ void RateControlFalcon::switchController(int32_t type)
 		_pitch_controller = new PID(1.0f, -1.0f);
 		_yaw_controller = new PID(1.0f, -1.0f);
 		controller_name = "PID";
+		break;
+	case 2: 
+		_roll_controller = new OBLTR(1.0f, -1.0f);
+		_pitch_controller = new OBLTR(1.0f, -1.0f);
+		_yaw_controller = new OBLTR(1.0f, -1.0f);
+		controller_name = "OBLTR";
 		break;
 	default:
 		_roll_controller = new RSLQR(1.0f, -1.0f);
