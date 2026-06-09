@@ -44,10 +44,35 @@
 
 using namespace matrix;
 
-/* RateControl::RateControl()
+RateControlFalcon::RateControlFalcon()
 {
-	// default gains for testing
-} */
+	m_filt_roll.setaExt("0,1;"
+			    "0,0;");
+	m_filt_roll.setbExt("0;"
+			    "41.93278258816682;");
+	m_filt_roll.setbCmd("-1;"
+		            "0;");
+	m_filt_roll.setl("11.050,0.977;"
+			 "0.977,461.2;");
+
+	m_filt_pitch.setaExt("0,1;"
+			    "0,0;");
+	m_filt_pitch.setbExt("0;"
+			    "41.75257258475981;");
+	m_filt_pitch.setbCmd("-1;"
+		            "0;");
+	m_filt_pitch.setl("11.050,0.977;"
+			 "0.977,459.3;");
+
+	m_filt_yaw.setaExt("0,1;"
+			    "0,0;");
+	m_filt_yaw.setbExt("0;"
+    			    "22.7267872004552622;");
+	m_filt_yaw.setbCmd("-1;"
+		            "0;");
+	m_filt_yaw.setl("11.050,0.958;"
+			 "0.958,250.1;");
+}
 
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
@@ -95,25 +120,25 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 			     const float dt, const bool landed)
 {
 	// angular rates error
-	Vector3f rate_error = rate_sp - rate;
-	Vector3f rate_error_OBLTR = rate - rate_sp;
-
-	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0), _rate_int(0), angular_accel(0), rate_sp(0));
-	float pitch_torque 	= _pitch_controller->update(rate(1), rate_error(1), _rate_int(1), angular_accel(1), rate_sp(1));
-	float yaw_torque 	= _yaw_controller->update(rate(2), rate_error(2), _rate_int(2), angular_accel(2), rate_sp(2));
+	Vector3f rate_error = rate_sp - rate;	
+	if (!landed) {
+		updateIntegral(rate_error, dt);
+	}
+	
+	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0), 
+			_rate_int(0), _rate_int_prev(0), angular_accel(0), rate_sp(0),
+			dt);
+	float pitch_torque 	= _pitch_controller->update(rate(1), rate_error(1),
+		       	_rate_int(1), _rate_int_prev(1), angular_accel(1), rate_sp(1),
+			dt);
+	float yaw_torque 	= _yaw_controller->update(rate(2), rate_error(2),
+		       	_rate_int(2), _rate_int_prev(2), angular_accel(2), rate_sp(2),
+			dt);
 	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
 	
 	publishStatus(rate_error, rate_sp, rate, torque);
-
-	// // update integral only if we are not landed
-	if (!landed) {
-		if(_active_ctrl_type != 2) {
-			updateIntegral(rate_error, dt);
-		}
-		else {
-			updateIntegral(rate_error_OBLTR, dt);
-		}
-	}
+	
+	_rate_int_prev = _rate_int;
 
 	return torque;
 }
@@ -196,12 +221,7 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		
 		float rate_i;
 		// Perform the integration using a first order method
-		if(_active_ctrl_type != 2) {
-			rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
-		}
-		else {
-			rate_i = _rate_int(i) + rate_error(i) * dt;
-		}
+		rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
 		// do not propagate the result if out of range or invalid
 		if (PX4_ISFINITE(rate_i)) {
 			_rate_int(i) = math::constrain(rate_i, -_lim_int(i), _lim_int(i));
@@ -241,9 +261,12 @@ void RateControlFalcon::switchController(int32_t type)
 		controller_name = "PID";
 		break;
 	case 2: 
-		_roll_controller = new OBLTR(1.0f, -1.0f);
-		_pitch_controller = new OBLTR(1.0f, -1.0f);
-		_yaw_controller = new OBLTR(1.0f, -1.0f);
+		_roll_controller = new OBLTR(1.0f, -1.0f, 
+					m_filt_roll);
+		_pitch_controller = new OBLTR(1.0f, -1.0f,
+					m_filt_pitch);
+		_yaw_controller = new OBLTR(1.0f, -1.0f,
+					m_filt_yaw);
 		controller_name = "OBLTR";
 		break;
 	default:

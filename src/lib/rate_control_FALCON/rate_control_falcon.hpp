@@ -47,6 +47,9 @@
 #include <uORB/topics/falcon_controller.h>
 #include <px4_platform_common/time.h>
 
+//Add Filters here
+#include "FALCON/Filters/OBLTRFilter.hpp"
+
 //Add New Controllers here
 #include "FALCON/Controllers/RateControllerBase.hpp"
 #include "FALCON/Controllers/RSLQR.hpp"
@@ -56,7 +59,7 @@
 class RateControlFalcon
 {
 public:
-	RateControlFalcon() = default;
+	RateControlFalcon();
 	~RateControlFalcon();
 
 	/**
@@ -149,6 +152,7 @@ private:
 
 	// States
 	matrix::Vector3f _rate_int; ///< integral term of the rate controller
+	matrix::Vector3f _rate_int_prev{0.0f, 0.0f, 0.0f}; ///< integral term of the rate controller
 
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
@@ -158,9 +162,14 @@ private:
 	RateControllerBase *_roll_controller{nullptr};
 	RateControllerBase *_pitch_controller{nullptr};
 	RateControllerBase *_yaw_controller{nullptr};
-
+		
 	int32_t _active_ctrl_type{-1};
-
+	
+	// Filters
+	OBLTRFilter m_filt_roll;
+	OBLTRFilter m_filt_pitch;
+	OBLTRFilter m_filt_yaw;
+	
 	// Msg
 	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};
 };

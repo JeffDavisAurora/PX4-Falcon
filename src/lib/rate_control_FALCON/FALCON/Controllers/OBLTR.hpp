@@ -2,20 +2,30 @@
 
 #include <matrix/matrix/math.hpp>
 #include <mathlib/mathlib.h>
+#include <armadillo>
 #include "RateControllerBase.hpp"
+#include "FALCON/Filters/OBLTRFilter.hpp"
 
 class OBLTR : public RateControllerBase
 {
 public:
         OBLTR(float saturation_positive,
-            float saturation_negative)
+              float saturation_negative,
+	      OBLTRFilter &filter)
         : RateControllerBase(saturation_positive, saturation_negative)
+	, _filter{filter}
         {}
 
 
         float update(float rate,
 		     float rate_error,
                      float rate_int,
+		     float rate_int_prev,
                      float angular_accel,
-                     float rate_sp) override;
+		     float rate_sp,
+		     float dt) override;
+private:
+	
+	OBLTRFilter &_filter;
+	float _torque;
 };
