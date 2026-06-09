@@ -96,17 +96,23 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 {
 	// angular rates error
 	Vector3f rate_error = rate_sp - rate;
+	Vector3f rate_error_OBLTR = rate - rate_sp;
 
-	float roll_torque 	= _roll_controller->update(rate_error(0), _rate_int(0), angular_accel(0), rate_sp(0));
-	float pitch_torque 	= _pitch_controller->update(rate_error(1), _rate_int(1), angular_accel(1), rate_sp(1));
-	float yaw_torque 	= _yaw_controller->update(rate_error(2), _rate_int(2), angular_accel(2), rate_sp(2));
+	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0), _rate_int(0), angular_accel(0), rate_sp(0));
+	float pitch_torque 	= _pitch_controller->update(rate(1), rate_error(1), _rate_int(1), angular_accel(1), rate_sp(1));
+	float yaw_torque 	= _yaw_controller->update(rate(2), rate_error(2), _rate_int(2), angular_accel(2), rate_sp(2));
 	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
 	
 	publishStatus(rate_error, rate_sp, rate, torque);
 
 	// // update integral only if we are not landed
 	if (!landed) {
-		updateIntegral(rate_error, dt);
+		if(_active_ctrl_type != 2) {
+			updateIntegral(rate_error, dt);
+		}
+		else {
+			updateIntegral(rate_error_OBLTR, dt);
+		}
 	}
 
 	return torque;

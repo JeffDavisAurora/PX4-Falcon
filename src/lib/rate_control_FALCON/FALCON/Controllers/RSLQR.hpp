@@ -12,7 +12,8 @@ public:
 	: RateControllerBase(saturation_positive, saturation_negative)
 	{}
 
-	float update(float rate_error,
+	float update(float rate,
+		     float rate_error,
 	             float rate_int,
 		     float angular_accel,
 		     float rate_sp) override;

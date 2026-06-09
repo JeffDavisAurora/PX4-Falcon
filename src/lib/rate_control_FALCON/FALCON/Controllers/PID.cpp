@@ -2,7 +2,8 @@
 #include <px4_platform_common/log.h>
 #include <mathlib/mathlib.h>
 
-float PID::update(float rate_error,
+float PID::update(float rate,
+		  float rate_error,
 		  float rate_int,
 		  float angular_accel,
 		  float rate_sp)

@@ -4,7 +4,7 @@ class RateControllerBase {
 public:
 	virtual ~RateControllerBase() = default;
 
-	virtual float update(float rate_error, float rate_int, float angular_accel, float rate_sp) = 0;
+	virtual float update(float rate, float rate_error, float rate_int, float angular_accel, float rate_sp) = 0;
 
 	virtual void set_gains(float p, float i, float d) {
 		_gain_p = p;
