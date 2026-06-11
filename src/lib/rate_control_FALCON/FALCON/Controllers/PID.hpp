@@ -19,5 +19,6 @@ public:
 		     float rate_int_prev,
 		     float angular_accel,
 		     float rate_sp,
-		     float dt) override;
+		     float dt,
+		     bool landed) override;
 };

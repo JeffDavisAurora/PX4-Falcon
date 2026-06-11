@@ -6,7 +6,7 @@ public:
 
 	virtual float update(float rate, float rate_error, float rate_int, 
 			float rate_int_prev, float angular_accel,
-		       	float rate_sp, float dt) = 0;
+		       	float rate_sp, float dt, bool landed) = 0;
 
 	virtual void set_gains(float p, float i, float d) {
 		_gain_p = p;

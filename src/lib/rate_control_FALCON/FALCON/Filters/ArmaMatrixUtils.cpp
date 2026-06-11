@@ -1,11 +1,22 @@
 #include "ArmaMatrixUtils.h"
-
+#include <px4_platform_common/log.h>
 
 bool parseMatrixString( arma::fmat &config_matrix,
 		std::string matrix_string)
 {
-  config_matrix = arma::fmat(matrix_string);
-  return (true);
+  try {
+  	config_matrix = arma::fmat(matrix_string);
+	if(!config_matrix.is_finite()){
+		PX4_ERR("Matrix contains NAN");
+		return false;
+	}
+	PX4_INFO("Passed matrix");
+  	return (true);
+    }
+  catch(const std::exception& e){
+	  PX4_ERR("Matrix parse failed: %s", e.what());
+	  return false;
+  }
 };
 
 

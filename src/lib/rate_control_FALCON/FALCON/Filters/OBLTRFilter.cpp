@@ -1,4 +1,5 @@
 #include "OBLTRFilter.hpp"
+#include "px4_platform_common/log.h"
 
 OBLTRFilter::OBLTRFilter()
 {
@@ -13,13 +14,8 @@ OBLTRFilter::OBLTRFilter(int state_size)
   m_bExt.zeros(state_size, 1);
   m_bCmd.zeros(state_size, 1);
   m_l.zeros(state_size, state_size);
-
-  std::cout <<  " in constructor" << std::endl;
-  std::cout << m_bFcim << std::endl;
+  PX4_INFO("Entered consturctor");
   m_bFcim.zeros(state_size, 1);
-  m_bFcim(0,0) = 1;
-
-  std::cout << m_bFcim << std::endl;
   m_soft_start = true; 
 }
 
@@ -45,8 +41,9 @@ std::vector<float> OBLTRFilter::updateXHat(float u_control_sat,
   std::vector<float> ret_vec; 
   
   // Checks
-  if (dt <=0.0f)
-    return(ret_vec);
+  if (dt <=0.0f) {
+	  return(ret_vec);
+  }
 
   // If we have recently cleared the filter we need to do a soft start
   // Set the current state, xhat, and the observed state yhat

@@ -33,3 +33,13 @@ float32 yaw_rate_sp
 float32 roll_rate
 float32 pitch_rate
 float32 yaw_rate
+
+# Observer Integral
+float32 roll_ei
+float32 pitch_ei
+float32 yaw_ei
+
+# Observer Omega
+float32 roll_omega
+float32 pitch_omega
+float32 yaw_omega
