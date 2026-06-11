@@ -37,29 +37,66 @@
 
 #include "rate_control_falcon.hpp"
 #include <px4_platform_common/defines.h>
-#include <iostream>
+#include <px4_platform_common/log.h>
 
 
 
 using namespace matrix;
 
-/* RateControl::RateControl()
+RateControlFalcon::RateControlFalcon()
 {
-	// default gains for testing
-} */
+	/*
+	m_filt_roll.setaExt("0,1;"
+			    "0,0;");
+	m_filt_roll.setbExt("0;"
+			    "41.93278258816682;");
+	m_filt_roll.setbCmd("-1;"
+		            "0;");
+	m_filt_roll.setl("11.050,0.977;"
+			 "0.977,461.2;");
+
+	m_filt_pitch.setaExt("0,1;"
+			    "0,0;");
+	m_filt_pitch.setbExt("0;"
+			    "41.75257258475981;");
+	m_filt_pitch.setbCmd("-1;"
+		            "0;");
+	m_filt_pitch.setl("11.050,0.977;"
+			 "0.977,459.3;");
+
+	m_filt_yaw.setaExt("0,1;"
+			    "0,0;");
+	m_filt_yaw.setbExt("0;"
+    			    "22.7267872004552622;");
+	m_filt_yaw.setbCmd("-1;"
+		            "0;");
+	m_filt_yaw.setl("11.050,0.958;"
+			 "0.958,250.1;");*/
+}
 
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
-
 	_gain_p = P;
 	_gain_i = I;
 	_gain_d = D;
 
-	_roll_controller.set_gains(_gain_p(0), _gain_i(0), _gain_d(0));
-	_pitch_controller.set_gains(_gain_p(1), _gain_i(1), _gain_d(1));
-	_yaw_controller.set_gains(_gain_p(2), _gain_i(2), _gain_d(2));
+	_roll_controller->set_gains(_gain_p(0), _gain_i(0), _gain_d(0));
+	_pitch_controller->set_gains(_gain_p(1), _gain_i(1), _gain_d(1));
+	_yaw_controller->set_gains(_gain_p(2), _gain_i(2), _gain_d(2));
 
+	// TODO: do this but good
+	_roll_controller->set_ff(_gain_p(0));
+	_pitch_controller->set_ff(_gain_p(1));
+	_yaw_controller->set_ff(_gain_p(2));
+}
 
+void RateControlFalcon::setFeedForwardGain(const Vector3f &FF)
+{
+	_gain_ff = FF;
+
+	// _roll_controller->set_ff(0);
+	// _pitch_controller->set_ff(0);
+	// _yaw_controller->set_ff(_gain_p);
 }
 
 void RateControlFalcon::setSaturationStatus(const Vector3<bool> &saturation_positive,
@@ -89,30 +126,79 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 {
 	// angular rates error
 	Vector3f rate_error = rate_sp - rate;
-
-
-
-	float roll_torque 	= _roll_controller.update(rate_error(0), _rate_int(0), angular_accel(0));
-	float pitch_torque 	= _pitch_controller.update(rate_error(1), _rate_int(1), angular_accel(1));
-	float yaw_torque 	= _yaw_controller.update(rate_error(2), _rate_int(2), angular_accel(2));
-	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
-
-
-
-	// // angular rates error
-
-	// // PID control with feed forward
-	// Vector3f torque = _gain_p.emult(rate_error) + _rate_int - _gain_d.emult(angular_accel) + _gain_ff.emult(rate_sp);
-
-	// // update integral only if we are not landed
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
-	// std::cout << (test_torque - torque)(0)/torque(0);
-	// std::cout << (test_torque - torque)(1)/torque(1);
-	// std::cout << (test_torque - torque)(2)/torque(2) << std::endl;
+
+	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0),
+			_rate_int(0), _rate_int_prev(0), angular_accel(0), rate_sp(0),
+			dt);
+	float pitch_torque 	= _pitch_controller->update(rate(1), rate_error(1),
+		       	_rate_int(1), _rate_int_prev(1), angular_accel(1), rate_sp(1),
+			dt);
+	float yaw_torque 	= _yaw_controller->update(rate(2), rate_error(2),
+		       	_rate_int(2), _rate_int_prev(2), angular_accel(2), rate_sp(2),
+			dt);
+	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
+
+	publishStatus(rate_error, rate_sp, rate, torque);
+
+	_rate_int_prev = _rate_int;
 
 	return torque;
+}
+
+void RateControlFalcon::publishStatus(const Vector3f &rate_error,
+				const Vector3f &rate_sp,
+                		const Vector3f &rate,
+				const Vector3f &torque)
+{
+	//falcon_rate_control_messages
+        falcon_controller_s status{};
+        status.timestamp = hrt_absolute_time();
+
+        //Controller type
+        status.controller_type = _active_ctrl_type;
+
+        // PID Gains
+        status.proportional_gain[0] = _gain_p(0);
+        status.proportional_gain[1] = _gain_p(1);
+        status.proportional_gain[2] = _gain_p(2);
+
+        status.integral_gain[0] = _gain_i(0);
+        status.integral_gain[1] = _gain_i(1);
+        status.integral_gain[2] = _gain_i(2);
+
+        status.derivative_gain[0] = _gain_d(0);
+        status.derivative_gain[1] = _gain_d(1);
+        status.derivative_gain[2] = _gain_d(2);
+
+        // Rate Errors
+        status.roll_rate_error = rate_error(0);
+        status.pitch_rate_error = rate_error(1);
+        status.yaw_rate_error = rate_error(2);
+
+        // Integrals
+        status.roll_rate_integral = _rate_int(0);
+        status.pitch_rate_integral = _rate_int(1);
+        status.yaw_rate_integral = _rate_int(2);
+
+        // Outputs
+        status.roll_torque = torque(0);
+        status.pitch_torque = torque(1);
+        status.yaw_torque = torque(2);
+
+        // Setpoints
+        status.roll_rate_sp = rate_sp(0);
+        status.pitch_rate_sp = rate_sp(1);
+        status.yaw_rate_sp = rate_sp(2);
+
+        // Actual Rates
+        status.roll_rate = rate(0);
+        status.pitch_rate = rate(1);
+        status.yaw_rate = rate(2);
+
+        _falcon_status_pub.publish(status);
 }
 
 void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
@@ -138,9 +224,9 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		float i_factor = rate_error(i) / math::radians(400.f);
 		i_factor = math::max(0.0f, 1.f - i_factor * i_factor);
 
+		float rate_i;
 		// Perform the integration using a first order method
-		float rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
-
+		rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
 		// do not propagate the result if out of range or invalid
 		if (PX4_ISFINITE(rate_i)) {
 			_rate_int(i) = math::constrain(rate_i, -_lim_int(i), _lim_int(i));
@@ -154,4 +240,54 @@ void RateControlFalcon::getRateControlStatus(rate_ctrl_status_s &rate_ctrl_statu
 	rate_ctrl_status.rollspeed_integ = _rate_int(0);
 	rate_ctrl_status.pitchspeed_integ = _rate_int(1);
 	rate_ctrl_status.yawspeed_integ = _rate_int(2);
+}
+
+void RateControlFalcon::switchController(int32_t type)
+{
+	if(type == _active_ctrl_type) return;
+
+	delete _roll_controller;
+	delete _pitch_controller;
+	delete _yaw_controller;
+
+	const char *controller_name = "RSLQR";
+
+	switch(type){
+	case 0:
+		_roll_controller = new RSLQR(1.0f, -1.0f);
+		_pitch_controller = new RSLQR(1.0f, -1.0f);
+		_yaw_controller = new RSLQR(1.0f, -1.0f);
+		controller_name = "RSLQR";
+		break;
+	case 1:
+		_roll_controller = new PID(1.0f, -1.0f);
+		_pitch_controller = new PID(1.0f, -1.0f);
+		_yaw_controller = new PID(1.0f, -1.0f);
+		controller_name = "PID";
+		break;
+	case 2:
+	/*	_roll_controller = new OBLTR(1.0f, -1.0f,
+					m_filt_roll);
+		_pitch_controller = new OBLTR(1.0f, -1.0f,
+					m_filt_pitch);
+		_yaw_controller = new OBLTR(1.0f, -1.0f,
+					m_filt_yaw);*/
+		controller_name = "OBLTR";
+		break;
+	default:
+		_roll_controller = new RSLQR(1.0f, -1.0f);
+		_pitch_controller = new RSLQR(1.0f, -1.0f);
+		_yaw_controller = new RSLQR(1.0f, -1.0f);
+		controller_name = "RSLQR (default)";
+		break;
+	}
+	_active_ctrl_type = type;
+	PX4_INFO("Switched to controller: %d (%s)", (int)_active_ctrl_type, controller_name);
+}
+
+RateControlFalcon::~RateControlFalcon()
+{
+	delete _roll_controller;
+	delete _pitch_controller;
+	delete _yaw_controller;
 }

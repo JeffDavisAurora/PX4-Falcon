@@ -230,3 +230,17 @@ parameters:
       max: 10
       unit: Hz
       decimal: 3
+    MC_CTRL_TYPE:
+      description:
+        short: Rate controller type
+        long: |-
+          Selects which rate controller algorithm to use.
+          0 RSLQR
+          1 PX4 Vanilla PID Controller
+          2 OBLTR
+      type: int32
+      default: 0
+      values:
+        0: RSLQR
+        1: PX4PID
+        2: OBLTR

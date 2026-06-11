@@ -53,6 +53,9 @@ publications:
   - topic: /fmu/out/transponder_report
     type: px4_msgs::msg::TransponderReport
 
+  - topic: /fmu/out/falcon_controller
+    type: px4_msgs::msg::FalconController
+
   # - topic: /fmu/out/vehicle_angular_velocity
   #   type: px4_msgs::msg::VehicleAngularVelocity
 

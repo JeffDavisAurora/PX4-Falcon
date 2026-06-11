@@ -43,14 +43,31 @@
 
 #include <mathlib/mathlib.h>
 #include <uORB/topics/rate_ctrl_status.h>
+#include <uORB/Publication.hpp>
+#include <uORB/topics/falcon_controller.h>
+#include <px4_platform_common/time.h>
 
+//Add Filters here
+//#include "FALCON/Filters/OBLTRFilter.hpp"
+
+//Add New Controllers here
+#include "FALCON/Controllers/RateControllerBase.hpp"
 #include "FALCON/Controllers/RSLQR.hpp"
+#include "FALCON/Controllers/PID.hpp"
+//#include "FALCON/Controllers/OBLTR.hpp"
 
 class RateControlFalcon
 {
 public:
-	RateControlFalcon() = default;
-	~RateControlFalcon() = default;
+	RateControlFalcon();
+	~RateControlFalcon();
+
+	/**
+	 * Switch the type of Controller
+	 * @param type int32_t type of contoller
+	 */
+
+	void switchController(int32_t type);
 
 	/**
 	 * Set the rate control PID gains
@@ -65,13 +82,12 @@ public:
 	 * @param integrator_limit limit value for all axes x, y, z
 	 */
 	void setIntegratorLimit(const matrix::Vector3f &integrator_limit) { _lim_int = integrator_limit; };
-
 	/**
 	 * Set direct rate to torque feed forward gain
 	 * @see _gain_ff
 	 * @param FF 3D vector of feed forward gains for body x,y,z axis
 	 */
-	void setFeedForwardGain(const matrix::Vector3f &FF) { _gain_ff = FF; };
+	void setFeedForwardGain(const matrix::Vector3f &FF);
 
 	/**
 	 * Set saturation status
@@ -124,6 +140,8 @@ public:
 
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
+	void publishStatus(const matrix::Vector3f &rate_error, const matrix::Vector3f &rate_sp,
+                           const matrix::Vector3f &rate, const matrix::Vector3f &torque);
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z
@@ -134,14 +152,26 @@ private:
 
 	// States
 	matrix::Vector3f _rate_int; ///< integral term of the rate controller
+	matrix::Vector3f _rate_int_prev{0.0f, 0.0f, 0.0f}; ///< integral term of the rate controller
 
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
 	matrix::Vector<bool, 3> _control_allocator_saturation_positive;
+
 	// Controllers
+	RateControllerBase *_roll_controller{nullptr};
+	RateControllerBase *_pitch_controller{nullptr};
+	RateControllerBase *_yaw_controller{nullptr};
 
-	RSLQR _roll_controller = RSLQR(1.0f, -1.0f);
-	RSLQR _pitch_controller = RSLQR(1.0f, -1.0f);
-	RSLQR _yaw_controller = RSLQR(1.0f, -1.0f);
+	int32_t _active_ctrl_type{-1};
 
+	// Filters
+	/*
+	OBLTRFilter m_filt_roll;
+	OBLTRFilter m_filt_pitch;
+	OBLTRFilter m_filt_yaw;
+	*/
+
+	// Msg
+	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};
 };
