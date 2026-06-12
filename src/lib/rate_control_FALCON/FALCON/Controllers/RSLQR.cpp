@@ -11,6 +11,6 @@ float RSLQR::update(float rate,
 		    float dt,
 		    bool landed)
 {
-	float torque = -_gain_p * rate + rate_int +_gain_ff * rate_sp;
+	float torque = -_gain_p * rate + rate_int_prev +_gain_ff * rate_sp;
 	return torque;
 }

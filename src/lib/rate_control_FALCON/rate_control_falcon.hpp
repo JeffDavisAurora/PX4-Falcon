@@ -153,7 +153,7 @@ private:
 
 	// States
 	matrix::Vector3f _rate_int; ///< integral term of the rate controller
-	matrix::Vector3f _rate_int_prev{0.0f, 0.0f, 0.0f}; ///< integral term of the rate controller
+	matrix::Vector3f _rate_int_prev; ///< integral term of the rate controller
 
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
