@@ -4,6 +4,7 @@ int32 controller_type
 float32[3] proportional_gain
 float32[3] integral_gain
 float32[3] derivative_gain
+float32[3] feedfoward_gain
 
 uint64 timestamp
 

@@ -88,7 +88,7 @@ void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const 
 
 void RateControlFalcon::setFeedForwardGain(const Vector3f &FF)
 {
-	_gain_ff = FF;
+	_gain_ff = _gain_p;
 
 	_roll_controller->set_ff(_gain_ff(0));
 	_pitch_controller->set_ff(_gain_ff(1));
@@ -186,15 +186,19 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
         status.derivative_gain[1] = _gain_d(1);
         status.derivative_gain[2] = _gain_d(2);
 
+	status.feedfoward_gain[0] = _gain_ff(0);
+	status.feedfoward_gain[1] = _gain_ff(1);
+	status.feedfoward_gain[2] = _gain_ff(2);
+
         // Rate Errors
         status.roll_rate_error = rate_error(0);
         status.pitch_rate_error = rate_error(1);
         status.yaw_rate_error = rate_error(2);
 
         // Integrals
-        status.roll_rate_integral = _rate_int(0);
-        status.pitch_rate_integral = _rate_int(1);
-        status.yaw_rate_integral = _rate_int(2);
+        status.roll_rate_integral = _rate_int_prev(0);
+        status.pitch_rate_integral = _rate_int_prev(1);
+        status.yaw_rate_integral = _rate_int_prev(2);
 
         // Outputs
         status.roll_torque = torque(0);
@@ -248,16 +252,16 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		i_factor = math::max(0.0f, 1.f - i_factor * i_factor);
 		
 		float rate_i;
-		if(_active_ctrl_type == 2) {
-			rate_i = _rate_int(i) + rate_error(i) * dt;
-		}
-		else {
+		//float rate_i_real;
+		//if(_active_ctrl_type == 2) {
+		//rate_i = _rate_int(i) + rate_error(i) * dt;
+		//}
 			// Perform the integration using a first order method
-			rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
-		}
+		rate_i = _rate_int(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
 		// do not propagate the result if out of range or invalid
 		if (PX4_ISFINITE(rate_i)) {
 			_rate_int(i) = math::constrain(rate_i, -_lim_int(i), _lim_int(i));
+			//_rate_int_prev(i) = math::constrain(rate_i_real, -_lim_int(i), _lim_int(i));
 		}
 	}
 }
