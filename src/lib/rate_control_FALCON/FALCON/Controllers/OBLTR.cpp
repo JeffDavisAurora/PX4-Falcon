@@ -27,7 +27,7 @@ float OBLTR::update(float rate,
   	_new_x_hat_eI = new_x_hat[0];
 	_new_x_hat_omega = new_x_hat[1];
 
-  	float torque =  _gain_i * new_x_hat[0] //gain_p is equivallent to gain_x
+  	float torque =  - _gain_i * new_x_hat[0] //gain_p is equivallent to gain_x
 		        - _gain_p * new_x_hat[1] + _gain_ff * rate_sp;
 	//float torque = -_gain_p*rate + rate_int_prev + _gain_ff*rate_sp;
 	_torque = torque;	

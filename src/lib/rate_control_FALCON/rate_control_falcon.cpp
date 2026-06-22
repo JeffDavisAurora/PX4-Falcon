@@ -154,8 +154,6 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	}
 	publishStatus(rate_error, rate_sp, rate, torque, obs_eI, obs_omega);
 	
-	//_rate_int_prev = _rate_int;
-
 	return torque;
 }
 
@@ -196,9 +194,9 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
         status.yaw_rate_error = rate_error(2);
 
         // Integrals
-        status.roll_rate_integral = _rate_int_prev(0);
-        status.pitch_rate_integral = _rate_int_prev(1);
-        status.yaw_rate_integral = _rate_int_prev(2);
+        status.roll_rate_integral = _rate_int(0);
+        status.pitch_rate_integral = _rate_int(1);
+        status.yaw_rate_integral = _rate_int(2);
 
         // Outputs
         status.roll_torque = torque(0);
@@ -254,7 +252,7 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		float rate_i;
 		float rate_i_real;
 		//if(_active_ctrl_type == 2) {
-			rate_i = _rate_int(i) + rate_error(i) * dt;
+			rate_i = _rate_int(i) - rate_error(i) * dt;
 		//}
 			// Perform the integration using a first order method
 		rate_i_real = _rate_int_prev(i) + i_factor * _gain_i(i) * rate_error(i) * dt;
