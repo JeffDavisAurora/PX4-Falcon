@@ -40,8 +40,6 @@
 #include <px4_platform_common/log.h>
 #include <iostream>
 
-
-
 using namespace matrix;
 
 RateControlFalcon::RateControlFalcon()
@@ -53,8 +51,8 @@ RateControlFalcon::RateControlFalcon()
 			    "41.93278258816682;");
 	m_filt_roll.setbCmd("-1;"
 		            "0;");
-	m_filt_roll.setl("11.050,0.977;"
-			 "0.977,461.2;");
+	m_filt_roll.setl("16.701,0.79697;"
+			 "39.848,65.56;");
 
 	m_filt_pitch.setaExt("0,1;"
 			    "0,0;");
@@ -62,8 +60,8 @@ RateControlFalcon::RateControlFalcon()
 			    "41.75257258475981;");
 	m_filt_pitch.setbCmd("-1;"
 		            "0;");
-	m_filt_pitch.setl("11.050,0.977;"
-			 "0.977,459.3;");
+	m_filt_pitch.setl("16.701,0.79697;"
+			 "39.848,65.56;");
 
 	m_filt_yaw.setaExt("0,1;"
 			    "0,0;");
@@ -71,8 +69,8 @@ RateControlFalcon::RateControlFalcon()
     			    "22.7267872004552622;");
 	m_filt_yaw.setbCmd("-1;"
 		            "0;");
-	m_filt_yaw.setl("11.050,0.958;"
-			 "0.958,250.1;");
+	m_filt_yaw.setl("13.451,0.8926;"
+			 "4.463,111.79;");
 }
 
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)

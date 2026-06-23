@@ -2,22 +2,21 @@
 
 #include <vector>
 #include <string>
-#include <armadillo>
-#include "ArmaMatrixUtils.h"
+#include <matrix/matrix/math.hpp>
+#include "MatrixUtils.h"
 
 class OBLTRFilter
 {
 public:
 	OBLTRFilter();
-	OBLTRFilter(int state_size);
 	~OBLTRFilter() {};
-	bool setaExt(std::string spec) {return( parseMatrixString(m_aExt, spec) );};
-	bool setbExt(std::string spec) {return( parseMatrixString(m_bExt, spec) );};
-	bool setbCmd(std::string spec) {return( parseMatrixString(m_bCmd, spec) );};
-	bool setl(std::string spec)    {return( parseMatrixString(m_l,    spec) );};
+	bool setaExt(const std::string &spec) { return parseMatrixString<2, 2>(m_aExt, spec); }
+	bool setbExt(const std::string &spec) { return parseMatrixString<2, 1>(m_bExt, spec); }
+	bool setbCmd(const std::string &spec) { return parseMatrixString<2, 1>(m_bCmd, spec); }
+	bool setl(const std::string &spec)    { return parseMatrixString<2, 2>(m_l, spec)   ; }
 	
-	std::vector<float> updateXHat(float u_ctrl, std::vector<float> y_ext_meas,
-		std::vector<float> y_hat, float y_cmd, float deltaFcim,
+	std::vector<float> updateXHat(float u_ctrl, const std::vector<float> y_ext_meas,
+		const std::vector<float> y_hat, float y_cmd, float deltaFcim,
 		float dt);
 
 	std::vector<float> getXHat();
@@ -25,16 +24,16 @@ public:
 	void reset();
 
 	std::string getSpec();
-
 private:
 
 	bool m_soft_start;
 
-	arma::fvec m_xhat;
+	matrix::Matrix<float, 2, 1>  m_xhat;
 	
-	arma::fmat m_aExt;
-	arma::fmat m_bExt;
-	arma::fmat m_bCmd;
-	arma::fmat m_l;
-	arma::fmat m_bFcim;
+	matrix::Matrix<float, 2, 2> m_aExt;
+	matrix::Matrix<float, 2, 1> m_bExt;
+	matrix::Matrix<float, 2, 1> m_bCmd;
+	matrix::Matrix<float, 2, 2> m_l;
+
+	matrix::Matrix<float, 2, 1> m_bFcim;
 };

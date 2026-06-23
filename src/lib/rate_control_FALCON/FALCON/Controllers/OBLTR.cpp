@@ -15,7 +15,7 @@ float OBLTR::update(float rate,
 	std::vector<float> x_hat = _filter.getXHat();
 	std::vector<float> y_hat = x_hat;
 
-	float torque_sat = std::clamp(_torque, _saturation_negative,
+	float torque_sat = math::constrain(_torque, _saturation_negative,
 		       		_saturation_positive);
 	std::vector<float> y_ext_meas;
 	y_ext_meas.push_back(_e_yI);

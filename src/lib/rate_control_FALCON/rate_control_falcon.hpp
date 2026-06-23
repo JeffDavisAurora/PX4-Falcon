@@ -167,9 +167,9 @@ private:
 	int32_t _active_ctrl_type{-1};
 	
 	// Filters
-	OBLTRFilter m_filt_roll{2};
-	OBLTRFilter m_filt_pitch{2};
-	OBLTRFilter m_filt_yaw{2};
+	OBLTRFilter m_filt_roll;
+	OBLTRFilter m_filt_pitch;
+	OBLTRFilter m_filt_yaw;
 	
 	// Msg
 	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};

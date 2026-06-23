@@ -2,7 +2,6 @@
 
 #include <matrix/matrix/math.hpp>
 #include <mathlib/mathlib.h>
-#include <armadillo>
 #include "RateControllerBase.hpp"
 #include "FALCON/Filters/OBLTRFilter.hpp"
 

@@ -42,8 +42,8 @@ px4_add_library(RateControlFalcon
 	FALCON/Controllers/OBLTR.hpp
 	FALCON/Filters/OBLTRFilter.cpp
 	FALCON/Filters/OBLTRFilter.hpp
-	FALCON/Filters/ArmaMatrixUtils.cpp
-	FALCON/Filters/ArmaMatrixUtils.h
+	FALCON/Filters/MatrixUtils.cpp
+	FALCON/Filters/MatrixUtils.h
 	rate_control_falcon.cpp
 	rate_control_falcon.hpp
 )
