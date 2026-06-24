@@ -81,20 +81,15 @@ void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const 
 	_roll_controller->set_gains(_gain_p(0), _gain_i(0), _gain_d(0));
 	_pitch_controller->set_gains(_gain_p(1), _gain_i(1), _gain_d(1));
 	_yaw_controller->set_gains(_gain_p(2), _gain_i(2), _gain_d(2));
-
-	// TODO: do this but good
-	_roll_controller->set_ff(_gain_p(0));
-	_pitch_controller->set_ff(_gain_p(1));
-	_yaw_controller->set_ff(_gain_p(2));
 }
 
 void RateControlFalcon::setFeedForwardGain(const Vector3f &FF)
 {
 	_gain_ff = _gain_p;
 
-	// _roll_controller->set_ff(0);
-	// _pitch_controller->set_ff(0);
-	// _yaw_controller->set_ff(_gain_p);
+	_roll_controller->set_ff(_gain_ff(0));
+	_pitch_controller->set_ff(_gain_ff(1));
+	_yaw_controller->set_ff(_gain_ff(2));
 }
 
 void RateControlFalcon::setSaturationStatus(const Vector3<bool> &saturation_positive,
