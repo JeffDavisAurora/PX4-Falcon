@@ -30,18 +30,24 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-# find_package(Armadillo REQUIRED)
-
 px4_add_library(RateControlFalcon
 	FALCON/Controllers/RateControllerBase.hpp
 	FALCON/Controllers/RSLQR.cpp
 	FALCON/Controllers/RSLQR.hpp
 	FALCON/Controllers/PID.cpp
 	FALCON/Controllers/PID.hpp
+	FALCON/Controllers/OBLTR.cpp
+	FALCON/Controllers/OBLTR.hpp
+	FALCON/Filters/OBLTRFilter.cpp
+	FALCON/Filters/OBLTRFilter.hpp
+	FALCON/Filters/MatrixUtils.cpp
+	FALCON/Filters/MatrixUtils.h
 	rate_control_falcon.cpp
 	rate_control_falcon.hpp
 )
 target_compile_options(RateControlFalcon PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
+target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(RateControlFalcon PRIVATE mathlib uorb_msgs)
 target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(RateControlFalcon PRIVATE mathlib uorb_msgs)
 

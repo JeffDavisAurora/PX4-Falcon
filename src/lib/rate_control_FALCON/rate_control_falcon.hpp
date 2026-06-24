@@ -141,7 +141,8 @@ public:
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
 	void publishStatus(const matrix::Vector3f &rate_error, const matrix::Vector3f &rate_sp,
-                           const matrix::Vector3f &rate, const matrix::Vector3f &torque);
+                           const matrix::Vector3f &rate, const matrix::Vector3f &torque,
+			   const matrix::Vector3f &obs_eI, const matrix::Vector3f &obs_omega);
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z
@@ -152,7 +153,7 @@ private:
 
 	// States
 	matrix::Vector3f _rate_int; ///< integral term of the rate controller
-	matrix::Vector3f _rate_int_prev{0.0f, 0.0f, 0.0f}; ///< integral term of the rate controller
+	matrix::Vector3f _rate_int_prev; ///< integral term of the rate controller
 
 	// Feedback from control allocation
 	matrix::Vector<bool, 3> _control_allocator_saturation_negative;
