@@ -48,5 +48,7 @@ px4_add_library(RateControlFalcon
 target_compile_options(RateControlFalcon PRIVATE ${MAX_CUSTOM_OPT_LEVEL})
 target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(RateControlFalcon PRIVATE mathlib uorb_msgs)
+target_include_directories(RateControlFalcon PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(RateControlFalcon PRIVATE mathlib uorb_msgs)
 
 px4_add_unit_gtest(SRC rate_control_test.cpp LINKLIBS RateControlFalcon)

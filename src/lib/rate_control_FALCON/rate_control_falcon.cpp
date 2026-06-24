@@ -81,15 +81,20 @@ void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const 
 	_roll_controller->set_gains(_gain_p(0), _gain_i(0), _gain_d(0));
 	_pitch_controller->set_gains(_gain_p(1), _gain_i(1), _gain_d(1));
 	_yaw_controller->set_gains(_gain_p(2), _gain_i(2), _gain_d(2));
+
+	// TODO: do this but good
+	_roll_controller->set_ff(_gain_p(0));
+	_pitch_controller->set_ff(_gain_p(1));
+	_yaw_controller->set_ff(_gain_p(2));
 }
 
 void RateControlFalcon::setFeedForwardGain(const Vector3f &FF)
 {
 	_gain_ff = _gain_p;
 
-	_roll_controller->set_ff(_gain_ff(0));
-	_pitch_controller->set_ff(_gain_ff(1));
-	_yaw_controller->set_ff(_gain_ff(2));
+	// _roll_controller->set_ff(0);
+	// _pitch_controller->set_ff(0);
+	// _yaw_controller->set_ff(_gain_p);
 }
 
 void RateControlFalcon::setSaturationStatus(const Vector3<bool> &saturation_positive,
@@ -121,8 +126,8 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
-	
-	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0), 
+
+	float roll_torque 	= _roll_controller->update(rate(0), rate_error(0),
 			_rate_int(0), _rate_int_prev(0), angular_accel(0), rate_sp(0),
 			dt, landed);
 	float pitch_torque 	= _pitch_controller->update(rate(1), rate_error(1),
@@ -153,7 +158,7 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	return torque;
 }
 
-void RateControlFalcon::publishStatus(const Vector3f &rate_error, 
+void RateControlFalcon::publishStatus(const Vector3f &rate_error,
 				const Vector3f &rate_sp,
                 		const Vector3f &rate, 
 				const Vector3f &torque,
@@ -244,7 +249,7 @@ void RateControlFalcon::updateIntegral(Vector3f &rate_error, const float dt)
 		// and up to 200 deg error leads to <25% reduction of I.
 		float i_factor = rate_error(i) / math::radians(400.f);
 		i_factor = math::max(0.0f, 1.f - i_factor * i_factor);
-		
+
 		float rate_i;
 		float rate_i_real;
 		//if(_active_ctrl_type == 2) {
@@ -285,19 +290,19 @@ void RateControlFalcon::switchController(int32_t type)
 		_yaw_controller = new RSLQR(1.0f, -1.0f);
 		controller_name = "RSLQR";
 		break;
-	case 1: 
+	case 1:
 		_roll_controller = new PID(1.0f, -1.0f);
 		_pitch_controller = new PID(1.0f, -1.0f);
 		_yaw_controller = new PID(1.0f, -1.0f);
 		controller_name = "PID";
 		break;
-	case 2: 
-		_roll_controller = new OBLTR(1.0f, -1.0f, 
+	case 2:
+	/*	_roll_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_roll);
 		_pitch_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_pitch);
 		_yaw_controller = new OBLTR(1.0f, -1.0f,
-					m_filt_yaw);
+					m_filt_yaw);*/
 		controller_name = "OBLTR";
 		break;
 	default:
