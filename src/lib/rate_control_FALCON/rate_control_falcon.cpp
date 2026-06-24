@@ -38,7 +38,6 @@
 #include "rate_control_falcon.hpp"
 #include <px4_platform_common/defines.h>
 #include <px4_platform_common/log.h>
-#include <iostream>
 
 using namespace matrix;
 
@@ -118,7 +117,6 @@ void RateControlFalcon::setNegativeSaturationFlag(size_t axis, bool is_saturated
 Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp, const Vector3f &angular_accel,
 			     const float dt, const bool landed)
 {
-	// angular rates error
 	Vector3f rate_error = rate_sp - rate;	
 	if (!landed) {
 		updateIntegral(rate_error, dt);

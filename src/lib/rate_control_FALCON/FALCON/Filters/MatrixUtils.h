@@ -3,96 +3,148 @@
 
 #include <matrix/matrix/math.hpp>
 #include <px4_platform_common/log.h>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <cstdlib>
+#include <px4_platform_common/posix.h>
+#include <cstring>
 
 template<size_t ROWS, size_t COLS>
 bool parseMatrixString(matrix::Matrix<float, ROWS, COLS> &config_matrix,
-	const std::string matrix_string);
-
-matrix::Matrix<float, 2, 1>convVec(const std::vector<float> in);
+	const char * matrix_string);
 
 template<size_t ROWS, size_t COLS>
-std::string getMatSpec(const matrix::Matrix<float, ROWS, COLS> &mat);
+void getMatSpec(const matrix::Matrix<float, ROWS, COLS> &mat, char *out, size_t out_len);
 
 template<size_t ROWS, size_t COLS>
 bool parseMatrixString(matrix::Matrix<float, ROWS, COLS> &config_matrix,
-	const std::string matrix_string)
+                       const char *matrix_string)
 {
-	std::istringstream ss(matrix_string);
-	std::string row_str;
+    if (matrix_string == nullptr) {
+        PX4_ERR("Matrix parse failed: null input");
+        return false;
+    }
 
-	for(size_t r = 0; r < ROWS; r++) {
-		if(!std::getline(ss, row_str, ';')) {
-			PX4_ERR("Matrix parse failed: expected %zu rows, got %zu", ROWS, r);
-			return false;
-		}
+    constexpr size_t MAX_STR = 256;  // adjust if needed
+    char buf[MAX_STR];
+    strncpy(buf, matrix_string, MAX_STR - 1);
+    buf[MAX_STR - 1] = '\0';
 
-		std::istringstream row_ss(row_str);
-		std::string cell_str;
+    char *saveptr_row = nullptr;
+    char *row_str = strtok_r(buf, ";", &saveptr_row);
 
-		for(size_t c = 0; c < COLS; c++){
-			if(!std::getline(row_ss, cell_str, ',')) {
-				PX4_ERR("Matrix parse failed: row %zu expects %zu columns," 
-						"missing col %zu", r, COLS, c);
-				return false;
-			}
+    for (size_t r = 0; r < ROWS; r++) {
+        if (!row_str) {
+            PX4_ERR("Matrix parse failed: expected %zu rows, got %zu", ROWS, r);
+            return false;
+        }
 
-			auto start = cell_str.find_first_not_of("\t");
-			auto end = cell_str.find_last_not_of("\t");
-			if(start == std::string::npos) {
-				PX4_ERR("Matrix parse failed: empty value at row %zu col %zu",
-						r, c);
-				return false;
-			}
+        char *saveptr_cell = nullptr;
+        char *cell_str = strtok_r(row_str, ",", &saveptr_cell);
 
-			cell_str = cell_str.substr(start, end - start + 1);
+        for (size_t c = 0; c < COLS; c++) {
+            if (!cell_str) {
+                PX4_ERR("Matrix parse failed: row %zu expects %zu columns, missing col %zu",
+                        r, COLS, c);
+                return false;
+            }
 
-			char *endptr = nullptr;
-			float v = strtof(cell_str.c_str(), &endptr);
-			if(endptr == cell_str.c_str() || *endptr != '\0') {
-				PX4_ERR("Matrix parse failed: invalid float '%s' at row %zu"
-						"col %zu", cell_str.c_str(), r, c);
-				return false;
-			}
+            while (*cell_str == ' ' || *cell_str == '\t') {
+                ++cell_str;
+            }
 
-			if(!PX4_ISFINITE(v)) {
-				PX4_ERR("Matrix contains NAN/Inf at row %zu col %zu", r, c);
-				return false;
-			}
+            char *end_trim = cell_str + strlen(cell_str);
+            while (end_trim > cell_str &&
+                   (end_trim[-1] == ' ' || end_trim[-1] == '\t')) {
+                --end_trim;
+            }
+            *end_trim = '\0';
 
-			config_matrix(r, c) = v;
-		}
-	}
-	return true;
+            if (*cell_str == '\0') {
+                PX4_ERR("Matrix parse failed: empty value at row %zu col %zu", r, c);
+                return false;
+            }
+
+            char *endptr = nullptr;
+            float v = strtof(cell_str, &endptr);
+
+            if (endptr == cell_str || *endptr != '\0') {
+                PX4_ERR("Matrix parse failed: invalid float '%s' at row %zu col %zu",
+                        cell_str, r, c);
+                return false;
+            }
+            if (!PX4_ISFINITE(v)) {
+                PX4_ERR("Matrix contains NAN/Inf at row %zu col %zu", r, c);
+                return false;
+            }
+	    PX4_INFO("Added value %f at row %zu col %zu", (double)v, r, c);
+            config_matrix(r, c) = v;
+
+            cell_str = strtok_r(nullptr, ",", &saveptr_cell);
+        }
+
+        row_str = strtok_r(nullptr, ";", &saveptr_row);
+    }
+
+    return true;
 }
 
-template<size_t ROWS, size_t COLS>
-std::string getMatSpec(const matrix::Matrix<float, ROWS, COLS> &mat) {
-	
-	std::stringstream ss;
+/*template<size_t ROWS, size_t COLS>
+void getMatSpec(const matrix::Matrix<float, ROWS, COLS> &mat,
+                char *out, size_t out_len)
+{
+    if (out_len == 0) {
+        return;
+    }
 
-	if((COLS == 0) || (ROWS == 0)) {
-		return "empty";
-	}
+    if (ROWS == 0 || COLS == 0) {
+        strncpy(out, "empty", out_len - 1);
+        out[out_len - 1] = '\0';
+        return;
+    }
 
-	for(size_t r = 0; r < ROWS; r++) {
-		for(size_t c = 0; c < COLS; c++) {
-			ss << std::to_string(mat(r,c));
+    char *ptr = out;
+    size_t remaining = out_len;
 
-			if(c < (COLS - 1)) {
-				ss << ",";
-			}
+    auto append_char = [&](char ch) {
+        if (remaining <= 1) {
+            return false;
+        }
+        *ptr++ = ch;
+        --remaining;
+        return true;
+    };
 
-		}
+    auto append_float = [&](float v) {
+        int n = px4_snprintf(ptr, remaining, "%g", (double)v);
+        if (n <= 0 || (size_t)n >= remaining) {
+            remaining = 1;
+            ptr[0] = '\0';
+            return false;
+        }
+        ptr += n;
+        remaining -= n;
+        return true;
+    };
 
-		if(r < (ROWS - 1)) { 
-			ss << ";";
-		}
-	}
-	return ss.str();
-}
+    for (size_t r = 0; r < ROWS; r++) {
+        for (size_t c = 0; c < COLS; c++) {
+            if (!append_float(mat(r, c))) {
+                out[out_len - 1] = '\0';
+                return;
+            }
+            if (c + 1 < COLS) {
+                if (!append_char(',')) {
+                    out[out_len - 1] = '\0';
+                    return;
+                }
+            }
+        }
+        if (r + 1 < ROWS) {
+            if (!append_char(';')) {
+                out[out_len - 1] = '\0';
+                return;
+            }
+        }
+    }
 
+    *ptr = '\0';
+}*/
 #endif

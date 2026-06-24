@@ -14,27 +14,28 @@ OBLTRFilter::OBLTRFilter()
 //                             y_cmd = reference signal for y
 //                                dt = delta time
 
-std::vector<float> OBLTRFilter::updateXHat(float u_control_sat, 
-              const std::vector<float> y_ext_meas,
-              const std::vector<float> y_hat, float y_cmd, float deltaFcim,
+matrix::Matrix<float, 2, 1> OBLTRFilter::updateXHat(float u_control_sat, 
+              const matrix::Matrix<float, 2, 1> y_ext_meas,
+              const matrix::Matrix<float, 2, 1> y_hat, float y_cmd, float deltaFcim,
               float dt)
 {
   // convert the input cpp vectors to arma vectors since we want the arma lib
   // to be completely encapsilated.
-  matrix::Matrix<float, 2, 1> matrix_y_ext_meas = convVec(y_ext_meas);
-  matrix::Matrix<float, 2, 1> matrix_y_hat      = convVec(y_hat);
-  std::vector<float> ret_vec; 
+  matrix::Matrix<float, 2, 1> ret_vec;	
+  matrix::Matrix<float, 2, 1> matrix_y_ext_meas = y_ext_meas;	
+  matrix::Matrix<float, 2, 1> matrix_y_hat = y_hat;	
   
   // Checks
   if (dt <=0.0f) {
+	  ret_vec.setZero();
 	  return(ret_vec);
   }
 
   // If we have recently cleared the filter we need to do a soft start
   // Set the current state, xhat, and the observed state yhat
   if (m_soft_start){
-    m_xhat     = matrix_y_ext_meas;
-    matrix_y_hat = matrix_y_ext_meas; 
+    m_xhat       = y_ext_meas;
+    matrix_y_hat = y_ext_meas; 
     m_soft_start = false; 
   }
 
@@ -54,15 +55,9 @@ std::vector<float> OBLTRFilter::updateXHat(float u_control_sat,
 //----------------------------------------------------
 //  getXHat()      returns x hat
 
-std::vector<float> OBLTRFilter::getXHat()
+matrix::Matrix<float, 2, 1> OBLTRFilter::getXHat()
 {
-  std::vector<float> ret_vec;
-  ret_vec.reserve(2);
-
-  for (int i = 0; i < 2; ++i){
-    ret_vec.push_back(static_cast<float>(m_xhat(i, 0)));
-  }
-  return(ret_vec); 
+  return m_xhat; 
 }
 
 
@@ -78,7 +73,7 @@ void OBLTRFilter::reset()
 }
 //----------------------------------------------------
 // getSpec()
-
+/*
 std::string OBLTRFilter::getSpec() {
 	
 	std::string spec = "";
@@ -90,3 +85,4 @@ std::string OBLTRFilter::getSpec() {
         spec += ", l = "    + getMatSpec(m_l);
 	return(spec); 
 }
+*/
