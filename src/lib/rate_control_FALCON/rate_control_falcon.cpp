@@ -292,12 +292,12 @@ void RateControlFalcon::switchController(int32_t type)
 		controller_name = "PID";
 		break;
 	case 2:
-	/*	_roll_controller = new OBLTR(1.0f, -1.0f,
+		_roll_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_roll);
 		_pitch_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_pitch);
 		_yaw_controller = new OBLTR(1.0f, -1.0f,
-					m_filt_yaw);*/
+					m_filt_yaw);
 		controller_name = "OBLTR";
 		break;
 	default:
