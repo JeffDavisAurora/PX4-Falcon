@@ -38,6 +38,8 @@ px4_add_library(RateControlFalcon
 	FALCON/Controllers/PID.hpp
 	FALCON/Controllers/OBLTR.cpp
 	FALCON/Controllers/OBLTR.hpp
+	FALCON/Controllers/AOBLTR.cpp
+	FALCON/Controllers/AOBLTR.hpp
 	FALCON/Filters/OBLTRFilter.cpp
 	FALCON/Filters/OBLTRFilter.hpp
 	FALCON/Filters/MatrixUtils.cpp

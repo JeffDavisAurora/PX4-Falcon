@@ -238,9 +238,11 @@ parameters:
           0 RSLQR
           1 PX4 Vanilla PID Controller
           2 OBLTR
+          3 AOBLTR
       type: int32
       default: 0
       values:
         0: RSLQR
         1: PX4PID
         2: OBLTR
+        3: AOBLTR

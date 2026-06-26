@@ -52,6 +52,8 @@ RateControlFalcon::RateControlFalcon()
 		            "0;");
 	m_filt_roll.setl("16.701,0.79697;"
 			 "39.848,65.56;");
+	m_filt_roll.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_roll.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 
 	m_filt_pitch.setaExt("0,1;"
 			    "0,0;");
@@ -61,7 +63,9 @@ RateControlFalcon::RateControlFalcon()
 		            "0;");
 	m_filt_pitch.setl("16.701,0.79697;"
 			 "39.848,65.56;");
-
+	m_filt_pitch.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_pitch.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
+	
 	m_filt_yaw.setaExt("0,1;"
 			    "0,0;");
 	m_filt_yaw.setbExt("0;"
@@ -70,6 +74,8 @@ RateControlFalcon::RateControlFalcon()
 		            "0;");
 	m_filt_yaw.setl("13.451,0.8926;"
 			 "4.463,111.79;");
+	m_filt_yaw.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_yaw.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 }
 
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
@@ -292,13 +298,22 @@ void RateControlFalcon::switchController(int32_t type)
 		controller_name = "PID";
 		break;
 	case 2:
-	/*	_roll_controller = new OBLTR(1.0f, -1.0f,
+		_roll_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_roll);
 		_pitch_controller = new OBLTR(1.0f, -1.0f,
 					m_filt_pitch);
 		_yaw_controller = new OBLTR(1.0f, -1.0f,
-					m_filt_yaw);*/
+					m_filt_yaw);
 		controller_name = "OBLTR";
+		break;
+	case 3:
+		_roll_controller = new AOBLTR(1.0f, -1.0f,
+					m_filt_roll);
+		_pitch_controller = new AOBLTR(1.0f, -1.0f,
+					m_filt_pitch);
+		_yaw_controller = new AOBLTR(1.0f, -1.0f,
+					m_filt_yaw);
+		controller_name = "AOBLTR";
 		break;
 	default:
 		_roll_controller = new RSLQR(1.0f, -1.0f);

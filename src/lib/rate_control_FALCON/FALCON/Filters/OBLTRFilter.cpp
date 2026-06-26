@@ -60,6 +60,21 @@ matrix::Matrix<float, 2, 1> OBLTRFilter::getXHat()
   return m_xhat; 
 }
 
+//----------------------------------------------------
+//  getRBF()      returns rbf
+
+matrix::Matrix<float, 11, 1> OBLTRFilter::getRBF()
+{
+  return m_rbf;
+}
+
+//----------------------------------------------------
+//  getRBF()      returns rbf
+
+matrix::Matrix<float, 2, 2> OBLTRFilter::getLyap()
+{
+  return m_lyap;
+}
 
 //----------------------------------------------------
 // reset()
