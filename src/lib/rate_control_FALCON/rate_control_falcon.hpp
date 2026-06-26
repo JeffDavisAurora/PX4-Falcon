@@ -48,13 +48,13 @@
 #include <px4_platform_common/time.h>
 
 //Add Filters here
-//#include "FALCON/Filters/OBLTRFilter.hpp"
+#include "FALCON/Filters/OBLTRFilter.hpp"
 
 //Add New Controllers here
 #include "FALCON/Controllers/RateControllerBase.hpp"
 #include "FALCON/Controllers/RSLQR.hpp"
 #include "FALCON/Controllers/PID.hpp"
-//#include "FALCON/Controllers/OBLTR.hpp"
+#include "FALCON/Controllers/OBLTR.hpp"
 
 class RateControlFalcon
 {
@@ -167,11 +167,9 @@ private:
 	int32_t _active_ctrl_type{-1};
 
 	// Filters
-	/*
 	OBLTRFilter m_filt_roll;
 	OBLTRFilter m_filt_pitch;
 	OBLTRFilter m_filt_yaw;
-	*/
 
 	// Msg
 	uORB::Publication<falcon_controller_s> _falcon_status_pub{ORB_ID(falcon_controller)};
