@@ -307,12 +307,29 @@ void RateControlFalcon::switchController(int32_t type)
 		controller_name = "OBLTR";
 		break;
 	case 3:
-		_roll_controller = new AOBLTR(1.0f, -1.0f,
-					m_filt_roll);
-		_pitch_controller = new AOBLTR(1.0f, -1.0f,
-					m_filt_pitch);
-		_yaw_controller = new AOBLTR(1.0f, -1.0f,
-					m_filt_yaw);
+		_roll_controller = new AOBLTR(1.0f, -1.0f, m_filt_roll,
+					    		 0.3f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
+
+		_pitch_controller = new AOBLTR(1.0f, -1.0f, m_filt_pitch,
+					     		 0.3f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
+							//
+		_yaw_controller = new AOBLTR(1.0f, -1.0f, m_filt_yaw,
+					   			 0.3f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
 		controller_name = "AOBLTR";
 		break;
 	default:
