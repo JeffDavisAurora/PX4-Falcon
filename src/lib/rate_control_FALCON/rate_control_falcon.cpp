@@ -50,9 +50,11 @@ RateControlFalcon::RateControlFalcon()
 			    "41.93278258816682;");
 	m_filt_roll.setbCmd("-1;"
 		            "0;");
-	m_filt_roll.setl("16.701,0.79697;"
-			 "39.848,65.56;");
-	m_filt_roll.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_roll.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
+
+	// m_filt_roll.setrbf("	0;  0.2;   0.4;    0.6;   0.8;  1;   1.2;  1.4;  1.6;  1.8;  2;");
+	m_filt_roll.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_roll.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 
 	m_filt_pitch.setaExt("0,1;"
@@ -61,23 +63,24 @@ RateControlFalcon::RateControlFalcon()
 			    "41.75257258475981;");
 	m_filt_pitch.setbCmd("-1;"
 		            "0;");
-	m_filt_pitch.setl("16.701,0.79697;"
-			 "39.848,65.56;");
-	m_filt_pitch.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_pitch.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
+
+	m_filt_roll.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_pitch.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
-	
+
 	m_filt_yaw.setaExt("0,1;"
 			    "0,0;");
 	m_filt_yaw.setbExt("0;"
     			    "22.7267872004552622;");
 	m_filt_yaw.setbCmd("-1;"
 		            "0;");
-	m_filt_yaw.setl("13.451,0.8926;"
-			 "4.463,111.79;");
-	m_filt_yaw.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_yaw.setl("134.51,8.926;"
+			 "44.63,1117.9;");
+
+	m_filt_roll.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_yaw.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 }
-
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
 {
 	_gain_p = P;
@@ -123,7 +126,7 @@ void RateControlFalcon::setNegativeSaturationFlag(size_t axis, bool is_saturated
 Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp, const Vector3f &angular_accel,
 			     const float dt, const bool landed)
 {
-	Vector3f rate_error = rate_sp - rate;	
+	Vector3f rate_error = rate_sp - rate;
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
@@ -155,13 +158,13 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 		             y->getXHatOmega()};
 	}
 	publishStatus(rate_error, rate_sp, rate, torque, obs_eI, obs_omega);
-	
+
 	return torque;
 }
 
 void RateControlFalcon::publishStatus(const Vector3f &rate_error,
 				const Vector3f &rate_sp,
-                		const Vector3f &rate, 
+                		const Vector3f &rate,
 				const Vector3f &torque,
 				const Vector3f &obs_eI,
 				const Vector3f &obs_omega)
@@ -219,7 +222,7 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
 	status.roll_ei = obs_eI(0);
 	status.pitch_ei = obs_eI(1);
 	status.yaw_ei = obs_eI(2);
-	
+
 	// Observer Omega
 	status.roll_omega = obs_omega(0);
 	status.pitch_omega = obs_omega(1);
@@ -308,7 +311,7 @@ void RateControlFalcon::switchController(int32_t type)
 		break;
 	case 3:
 		_roll_controller = new AOBLTR(1.0f, -1.0f, m_filt_roll,
-					    		 0.3f,      // eNullDeadzone
+					    		 0.1f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0001f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
@@ -316,7 +319,7 @@ void RateControlFalcon::switchController(int32_t type)
                    			     -2.0f);    // theta_hat_min
 
 		_pitch_controller = new AOBLTR(1.0f, -1.0f, m_filt_pitch,
-					     		 0.3f,      // eNullDeadzone
+					     		 0.1f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0001f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
@@ -324,7 +327,7 @@ void RateControlFalcon::switchController(int32_t type)
                    			     -2.0f);    // theta_hat_min
 							//
 		_yaw_controller = new AOBLTR(1.0f, -1.0f, m_filt_yaw,
-					   			 0.3f,      // eNullDeadzone
+					   			 0.1f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0001f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
