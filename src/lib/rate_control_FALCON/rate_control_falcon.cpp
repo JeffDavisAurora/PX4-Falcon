@@ -144,7 +144,7 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	Vector3f obs_eI = {0.f, 0.f, 0.f};
 	Vector3f obs_omega = {0.f, 0.f, 0.f};
 
-	if(_active_ctrl_type == 2) {
+	if(_active_ctrl_type == 2 || _active_ctrl_type == 3) {
 
 		auto* r = static_cast<OBLTR*>(_roll_controller);
 		auto* p = static_cast<OBLTR*>(_pitch_controller);
@@ -189,9 +189,9 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
         status.derivative_gain[1] = _gain_d(1);
         status.derivative_gain[2] = _gain_d(2);
 
-	status.feedfoward_gain[0] = _gain_ff(0);
-	status.feedfoward_gain[1] = _gain_ff(1);
-	status.feedfoward_gain[2] = _gain_ff(2);
+		status.feedfoward_gain[0] = _gain_ff(0);
+		status.feedfoward_gain[1] = _gain_ff(1);
+		status.feedfoward_gain[2] = _gain_ff(2);
 
         // Rate Errors
         status.roll_rate_error = rate_error(0);
@@ -218,15 +218,15 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
         status.pitch_rate = rate(1);
         status.yaw_rate = rate(2);
 
-	// Observer Integral
-	status.roll_ei = obs_eI(0);
-	status.pitch_ei = obs_eI(1);
-	status.yaw_ei = obs_eI(2);
+		// Observer Integral
+		status.roll_ei = obs_eI(0);
+		status.pitch_ei = obs_eI(1);
+		status.yaw_ei = obs_eI(2);
 
-	// Observer Omega
-	status.roll_omega = obs_omega(0);
-	status.pitch_omega = obs_omega(1);
-	status.yaw_omega = obs_omega(2);
+		// Observer Omega
+		status.roll_omega = obs_omega(0);
+		status.pitch_omega = obs_omega(1);
+		status.yaw_omega = obs_omega(2);
 
         _falcon_status_pub.publish(status);
 }
