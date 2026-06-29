@@ -50,8 +50,8 @@ RateControlFalcon::RateControlFalcon()
 			    "41.93278258816682;");
 	m_filt_roll.setbCmd("-1;"
 		            "0;");
-	m_filt_roll.setl("16.701,0.79697;"
-			 "39.848,65.56;");
+	m_filt_roll.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
 
 	m_filt_pitch.setaExt("0,1;"
 			    "0,0;");
@@ -59,8 +59,8 @@ RateControlFalcon::RateControlFalcon()
 			    "41.75257258475981;");
 	m_filt_pitch.setbCmd("-1;"
 		            "0;");
-	m_filt_pitch.setl("16.701,0.79697;"
-			 "39.848,65.56;");
+	m_filt_pitch.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
 
 	m_filt_yaw.setaExt("0,1;"
 			    "0,0;");
@@ -68,8 +68,8 @@ RateControlFalcon::RateControlFalcon()
     			    "22.7267872004552622;");
 	m_filt_yaw.setbCmd("-1;"
 		            "0;");
-	m_filt_yaw.setl("13.451,0.8926;"
-			 "4.463,111.79;");
+	m_filt_yaw.setl("134.51,8.926;"
+			 "44.63,1117.9;");
 }
 
 void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const Vector3f &D)
@@ -117,7 +117,7 @@ void RateControlFalcon::setNegativeSaturationFlag(size_t axis, bool is_saturated
 Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp, const Vector3f &angular_accel,
 			     const float dt, const bool landed)
 {
-	Vector3f rate_error = rate_sp - rate;	
+	Vector3f rate_error = rate_sp - rate;
 	if (!landed) {
 		updateIntegral(rate_error, dt);
 	}
@@ -149,13 +149,13 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 		             y->getXHatOmega()};
 	}
 	publishStatus(rate_error, rate_sp, rate, torque, obs_eI, obs_omega);
-	
+
 	return torque;
 }
 
 void RateControlFalcon::publishStatus(const Vector3f &rate_error,
 				const Vector3f &rate_sp,
-                		const Vector3f &rate, 
+                		const Vector3f &rate,
 				const Vector3f &torque,
 				const Vector3f &obs_eI,
 				const Vector3f &obs_omega)
@@ -213,7 +213,7 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
 	status.roll_ei = obs_eI(0);
 	status.pitch_ei = obs_eI(1);
 	status.yaw_ei = obs_eI(2);
-	
+
 	// Observer Omega
 	status.roll_omega = obs_omega(0);
 	status.pitch_omega = obs_omega(1);
