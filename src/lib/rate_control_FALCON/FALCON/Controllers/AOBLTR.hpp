@@ -67,7 +67,7 @@ private:
     // tunable parameters
     float _eNullDeadzone;        // deadzone radius
     float _B_torque_ol;          // input gain
-    float _theta_gain_torque;    // adaptation gain
+    float _theta_gain_torque;    // adaptation gain (gamma)
     float _eps_theta_torque;     // projection epsilon
     float _theta_hat_max_torque; // upper bound
     float _theta_hat_min_torque; // lower bound
