@@ -23,12 +23,14 @@ float32 roll_torque
 float32 pitch_torque
 float32 yaw_torque
 
+float32 roll_torque_baseline
+float32 pitch_torque_baseline
+float32 yaw_torque_baseline
 
 # Setpoints
 float32 roll_rate_sp
 float32 pitch_rate_sp
 float32 yaw_rate_sp
-
 
 # Actual Rates
 float32 roll_rate

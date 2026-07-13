@@ -55,7 +55,7 @@
 #include "FALCON/Controllers/RSLQR.hpp"
 #include "FALCON/Controllers/PID.hpp"
 #include "FALCON/Controllers/OBLTR.hpp"
-#include "FALCON/Controllers/AOBLTR.hpp"
+#include "FALCON/Controllers/AAOBLTR.hpp"
 
 class RateControlFalcon
 {
@@ -142,8 +142,8 @@ public:
 private:
 	void updateIntegral(matrix::Vector3f &rate_error, const float dt);
 	void publishStatus(const matrix::Vector3f &rate_error, const matrix::Vector3f &rate_sp,
-                           const matrix::Vector3f &rate, const matrix::Vector3f &torque,
-			   const matrix::Vector3f &obs_eI, const matrix::Vector3f &obs_omega);
+                    const matrix::Vector3f &rate, const matrix::Vector3f &torque, const matrix::Vector3f &baseline_torque,
+			   		const matrix::Vector3f &obs_eI, const matrix::Vector3f &obs_omega);
 
 	// Gains
 	matrix::Vector3f _gain_p; ///< rate control proportional gain for all axes x, y, z
