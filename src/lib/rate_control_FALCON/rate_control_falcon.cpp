@@ -49,9 +49,11 @@ RateControlFalcon::RateControlFalcon()
 			    "41.93278258816682;");
 	m_filt_roll.setbCmd("-1;"
 		            "0;");
-	m_filt_roll.setl("16.701,0.79697;"
-			 "39.848,65.56;");
-	m_filt_roll.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_roll.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
+
+	// m_filt_roll.setrbf("	0;  0.2;   0.4;    0.6;   0.8;  1;   1.2;  1.4;  1.6;  1.8;  2;");
+	m_filt_roll.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_roll.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 
 	m_filt_pitch.setaExt("0,1;"
@@ -60,20 +62,22 @@ RateControlFalcon::RateControlFalcon()
 			    "41.75257258475981;");
 	m_filt_pitch.setbCmd("-1;"
 		            "0;");
-	m_filt_pitch.setl("16.701,0.79697;"
-			 "39.848,65.56;");
-	m_filt_pitch.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_pitch.setl("339.45,0.15796;"
+			 "87.876, 1348.3;");
+
+	m_filt_pitch.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_pitch.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
-	
+
 	m_filt_yaw.setaExt("0,1;"
 			    "0,0;");
 	m_filt_yaw.setbExt("0;"
     			    "22.7267872004552622;");
 	m_filt_yaw.setbCmd("-1;"
 		            "0;");
-	m_filt_yaw.setl("13.451,0.8926;"
-			 "4.463,111.79;");
-	m_filt_yaw.setrbf("0; 0.2; 0.4; 0.6; 0.8; 1; 1.2; 1.4; 1.6; 1.8; 2;");
+	m_filt_yaw.setl("134.51,8.926;"
+			 "44.63,1117.9;");
+
+	m_filt_yaw.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_yaw.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 }
 
@@ -325,28 +329,28 @@ void RateControlFalcon::switchController(int32_t type)
 		break;
 	case 3:
 		_roll_controller = new AAOBLTR(1.0f, -1.0f, m_filt_roll,
-					    		0.1f,      // eNullDeadzone
-                   			    0.05f,     // B_torque_ol
-                   			    0.0f,   // theta_gain_torque // gamma param
-                   			    0.0005f,   // eps_theta_torque
-                   			    1.0f,      // theta_hat_max
-                   			    -1.0f);    // theta_hat_min
+					     0.1f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
 
 		_pitch_controller = new AAOBLTR(1.0f, -1.0f, m_filt_pitch,
-					     		0.1f,      // eNullDeadzone
-                   			    0.05f,     // B_torque_ol
-                   			    0.0f,   // theta_gain_torque // gamma param
-                   			    0.0005f,   // eps_theta_torque
-                   			    1.0f,      // theta_hat_max
-                   			    -1.0f);    // theta_hat_min
-							//
+					     0.1f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
+
 		_yaw_controller = new AAOBLTR(1.0f, -1.0f, m_filt_yaw,
-					   			0.1f,      // eNullDeadzone
-                   			    0.05f,     // B_torque_ol
-                   			    0.0f,   // theta_gain_torque // gamma param
-                   			    0.0005f,   // eps_theta_torque
-                   			    1.0f,      // theta_hat_max
-                   			    -1.0f);    // theta_hat_min
+					     0.1f,      // eNullDeadzone
+                   			     0.05f,     // B_torque_ol
+                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0005f,   // eps_theta_torque
+                   			     2.0f,      // theta_hat_max
+                   			     -2.0f);    // theta_hat_min
 		controller_name = "AOBLTR";
 		break;
 	default:
