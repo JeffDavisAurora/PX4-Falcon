@@ -51,8 +51,7 @@ RateControlFalcon::RateControlFalcon()
 		            "0;");
 	m_filt_roll.setl("339.45,0.15796;"
 			 "87.876, 1348.3;");
-
-	// m_filt_roll.setrbf("	0;  0.2;   0.4;    0.6;   0.8;  1;   1.2;  1.4;  1.6;  1.8;  2;");
+			 
 	m_filt_roll.setrbf("-0.25; -0.20; -0.15; -0.10;  -0.05; 0.0; 0.05; 0.10; 0.15; 0.20; 0.25");
 	m_filt_roll.setlyap("5.59727906491365,0.365829561573106;0.365829561573106,3.99250815948318");
 
@@ -143,7 +142,7 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
 	Vector3f obs_eI = {0.f, 0.f, 0.f};
 	Vector3f obs_omega = {0.f, 0.f, 0.f};
-	Vector3 baseline_torque = {0.f, 0.f, 0.f};
+	Vector3f baseline_torque = {0.f, 0.f, 0.f};
 
 	if(_active_ctrl_type == 2) {
 
@@ -159,7 +158,6 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 		             y->getXHatOmega()};
 	}
 	if(_active_ctrl_type == 3) {
-
 		auto* r = static_cast<AAOBLTR*>(_roll_controller);
 		auto* p = static_cast<AAOBLTR*>(_pitch_controller);
 		auto* y = static_cast<AAOBLTR*>(_yaw_controller);
@@ -331,15 +329,15 @@ void RateControlFalcon::switchController(int32_t type)
 		_roll_controller = new AAOBLTR(1.0f, -1.0f, m_filt_roll,
 					     0.1f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
-                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
                    			     2.0f,      // theta_hat_max
                    			     -2.0f);    // theta_hat_min
 
 		_pitch_controller = new AAOBLTR(1.0f, -1.0f, m_filt_pitch,
-					     0.1f,      // eNullDeadzone
+					     0.1f,      // eNullDeadzone rad/s
                    			     0.05f,     // B_torque_ol
-                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
                    			     2.0f,      // theta_hat_max
                    			     -2.0f);    // theta_hat_min
@@ -347,11 +345,11 @@ void RateControlFalcon::switchController(int32_t type)
 		_yaw_controller = new AAOBLTR(1.0f, -1.0f, m_filt_yaw,
 					     0.1f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
-                   			     0.0001f,   // theta_gain_torque // gamma param
+                   			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
                    			     2.0f,      // theta_hat_max
                    			     -2.0f);    // theta_hat_min
-		controller_name = "AOBLTR";
+		controller_name = "AAOBLTR";
 		break;
 	default:
 		_roll_controller = new RSLQR(1.0f, -1.0f);

@@ -2,7 +2,7 @@
 #include <px4_platform_common/log.h>
 
 matrix::Matrix<float, 11, 1> AAOBLTR::evaluateRBF(const float rate) {
-	
+
 	matrix::Matrix<float, 11, 1> centers = _filter.getRBF();
 
 	float dMax = abs(centers(1,0) - centers(0,0));
@@ -20,7 +20,7 @@ matrix::Matrix<float, 11, 1> AAOBLTR::evaluateRBF(const float rate) {
 }
 
 void AAOBLTR::calculateAdaptation(const float rate) {
-	
+
 	matrix::Matrix<float, 11, 1> torque_rbf = evaluateRBF(rate);
 
 	for(int i = 0; i < 11; ++i) {
@@ -39,7 +39,7 @@ void AAOBLTR::updateWeights(const float rate, const float rate_int, const float 
 
 	matrix::Matrix<float, 2, 1> x_hat = _filter.getXHat();
 	matrix::Matrix<float, 2, 1> e_state = current_rate_state - x_hat; // (2x1) calculate the error vector
-	
+
 	float mu = muDeadzone(e_state, dt);
 	matrix::Matrix<float, 2, 1> eDeadzone_torque = e_state * mu;
 	matrix::Matrix<float, 1, 2> eDeadzone_T = eDeadzone_torque.transpose();  // (1x2) Take the transponse of the the deadzone torque vector
@@ -52,8 +52,8 @@ void AAOBLTR::updateWeights(const float rate, const float rate_int, const float 
 	_B_torque_ol_ext.setZero();
 	_B_torque_ol_ext(1,0) = _B_torque_ol;  // (2x1) Squared up B-matrix
 	matrix::Matrix<float, 12, 1> tmp_12x1 = tmp_12x2b * _B_torque_ol_ext;     // (12x1)
-	
-	matrix::Matrix<float, 12, 1> torque_theta_hat_dot = -_theta_gain_torque * tmp_12x1; // Calculate theta hat dot 
+
+	matrix::Matrix<float, 12, 1> torque_theta_hat_dot = -_theta_gain_torque * tmp_12x1; // Calculate theta hat dot
 
 	matrix::Matrix<float, 12, 1> torque_theta_hat_dot_proj = rectangularProjection(_torque_theta_hat,
 									torque_theta_hat_dot,
@@ -61,7 +61,7 @@ void AAOBLTR::updateWeights(const float rate, const float rate_int, const float 
 									_theta_hat_max_torque,
 									_theta_hat_min_torque,
 									dt);
-		
+
 	_torque_theta_hat = _torque_theta_hat + torque_theta_hat_dot_proj * dt;
 }
 
@@ -112,7 +112,7 @@ matrix::Matrix<float, 12, 1> AAOBLTR::rectangularProjection(
 }
 
 float AAOBLTR::muDeadzone(const matrix::Matrix<float, 2, 1> &e, const float dt) {
-	
+
 	float sum_sq = 0.0f;
 	// manually calculate the norm of the error vector
 	for (int i = 0; i < 2; i++) {
@@ -155,14 +155,14 @@ float AAOBLTR::update(float rate,
 	_new_x_hat_omega = new_x_hat(1,0);
 
 	float torque =  - _gain_i * new_x_hat(0,0)
-					- _gain_p * new_x_hat(1,0) 
+					- _gain_p * new_x_hat(1,0)
 					+ _gain_ff * rate_sp;
 	_baseline_torque = torque;
-	
+
 	calculateAdaptation(rate);
 	updateWeights(rate, rate_int, dt);
 	_torque = _baseline_torque + _adaptation_torque;
-        
+
 	return _torque;
 }
 

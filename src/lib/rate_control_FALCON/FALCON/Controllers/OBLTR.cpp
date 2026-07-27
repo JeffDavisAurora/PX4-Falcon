@@ -10,7 +10,7 @@ float OBLTR::update(float rate,
                   float rate_sp,
 		  float dt,
 		  bool landed)
-{	
+{
 	_e_yI = rate_int;
 	matrix::Matrix<float, 2, 1> x_hat = _filter.getXHat();
 	matrix::Matrix<float, 2, 1> y_hat = x_hat;
@@ -22,15 +22,14 @@ float OBLTR::update(float rate,
 	y_ext_meas(1,0) = rate;
 
 	float deltaFcim_surge = 0.0f;
-	matrix::Matrix<float, 2, 1> new_x_hat = _filter.updateXHat(torque_sat, y_ext_meas, 
-			                       y_hat, rate_sp, deltaFcim_surge, dt);	
+	matrix::Matrix<float, 2, 1> new_x_hat = _filter.updateXHat(torque_sat, y_ext_meas,
+			                       y_hat, rate_sp, deltaFcim_surge, dt);
   	_new_x_hat_eI = new_x_hat(0,0);
 	_new_x_hat_omega = new_x_hat(1,0);
 
   	float torque =  - _gain_i * new_x_hat(0,0) //gain_p is equivallent to gain_x
 		        - _gain_p * new_x_hat(1,0) + _gain_ff * rate_sp;
-	//float torque = -_gain_p*rate + rate_int_prev + _gain_ff*rate_sp;
-	_torque = torque;	
+	_torque = torque;
 	return _torque;
 }
 
