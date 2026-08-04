@@ -52,7 +52,7 @@ public:
 
     float getXHatEI() const { return _new_x_hat_eI; }
     float getXHatOmega() const { return _new_x_hat_omega; }
-    float getBaselineTorque() const { return _baseline_torque; }
+    float getBaselineTorque() const { return _adaptation_torque; }
 
 private:
     OBLTRFilter &_filter;

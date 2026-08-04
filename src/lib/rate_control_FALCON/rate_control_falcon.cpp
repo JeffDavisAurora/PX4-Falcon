@@ -93,7 +93,7 @@ void RateControlFalcon::setPidGains(const Vector3f &P, const Vector3f &I, const 
 
 void RateControlFalcon::setFeedForwardGain(const Vector3f &FF)
 {
-	_gain_ff = _gain_p;
+	_gain_ff = FF;
 
 	_roll_controller->set_ff(_gain_ff(0));
 	_pitch_controller->set_ff(_gain_ff(1));
@@ -142,6 +142,7 @@ Vector3f RateControlFalcon::update(const Vector3f &rate, const Vector3f &rate_sp
 	Vector3f torque = {roll_torque, pitch_torque, yaw_torque};
 	Vector3f obs_eI = {0.f, 0.f, 0.f};
 	Vector3f obs_omega = {0.f, 0.f, 0.f};
+	Vector3f baseline_torque = {0.f, 0.f, 0.f};
 	Vector3f baseline_torque = {0.f, 0.f, 0.f};
 
 	if(_active_ctrl_type == 2) {
@@ -223,7 +224,7 @@ void RateControlFalcon::publishStatus(const Vector3f &rate_error,
         status.pitch_torque = torque(1);
         status.yaw_torque = torque(2);
 
-		status.roll_torque_baseline = baseline_torque(0);
+	status.roll_torque_baseline = baseline_torque(0);
         status.pitch_torque_baseline = baseline_torque(1);
         status.yaw_torque_baseline = baseline_torque(2);
 
@@ -327,7 +328,7 @@ void RateControlFalcon::switchController(int32_t type)
 		break;
 	case 3:
 		_roll_controller = new AAOBLTR(1.0f, -1.0f, m_filt_roll,
-					     0.1f,      // eNullDeadzone
+					     0.4f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
@@ -335,7 +336,7 @@ void RateControlFalcon::switchController(int32_t type)
                    			     -2.0f);    // theta_hat_min
 
 		_pitch_controller = new AAOBLTR(1.0f, -1.0f, m_filt_pitch,
-					     0.1f,      // eNullDeadzone rad/s
+					     0.4f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
@@ -343,7 +344,7 @@ void RateControlFalcon::switchController(int32_t type)
                    			     -2.0f);    // theta_hat_min
 
 		_yaw_controller = new AAOBLTR(1.0f, -1.0f, m_filt_yaw,
-					     0.1f,      // eNullDeadzone
+					     0.4f,      // eNullDeadzone
                    			     0.05f,     // B_torque_ol
                    			     0.0f,   // theta_gain_torque // gamma param
                    			     0.0005f,   // eps_theta_torque
